@@ -1,109 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Donate via UPI</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #121212;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BobaMasterFPS — Support & Links</title>
 
-    .qr-box {
-      background: white;
-      padding: 16px;
-      border-radius: 12px;
-      margin-bottom: 16px;
-    }
+<!-- Fonts & Libraries -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    .pay-btn {
-      background: #00c853;
-      color: white;
-      padding: 12px 24px;
-      font-size: 18px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+<style>
+:root {
+  --bg: #000;
+  --card-bg: rgba(20,20,20,0.6);
+  --border: rgba(255,255,255,0.05);
+  --muted: #aaa;
+  --accent: #fff;
+  --font: 'Poppins', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  height: 100%;
+  font-family: var(--font);
+  background: var(--bg) url('c7e35a6e-fe4c-4cc4-85a8-972250ec4c08.png') center/cover no-repeat fixed;
+  color: #fff;
+  overflow: hidden;
+}
 
-    .status {
-      margin-top: 20px;
-      font-size: 18px;
-      color: #ccc;
-    }
+/* glowing text */
+.title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 0 8px #fff, 0 0 15px #fff;
+}
+.subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 6px;
+}
 
-    .thank-you {
-      font-size: 28px;
-      color: #00e676;
-      display: none;
-    }
+/* main card */
+.container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 40px 30px;
+  text-align: center;
+  backdrop-filter: blur(20px);
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 0 25px rgba(255,255,255,0.05);
+}
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto 10px;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-    .fade-out {
-      animation: fadeOut 1s forwards;
-    }
+/* status block */
+.status {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 15px auto;
+  padding: 10px;
+  max-width: 320px;
+  font-size: 13px;
+  color: #ccc;
+  line-height: 1.4;
+}
 
-    @keyframes fadeOut {
-      to {
-        opacity: 0;
-        transform: scale(0.9);
-      }
-    }
-  </style>
+/* social icons */
+.socials {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 15px 0;
+}
+.socials a {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  text-decoration: none;
+  font-size: 18px;
+  box-shadow: 0 0 10px rgba(255,255,255,0.2);
+  transition: transform .2s, box-shadow .2s;
+}
+.socials a:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 15px rgba(255,255,255,0.5);
+}
+
+/* QR + Donate */
+.qwrap {
+  width: 140px; height: 140px;
+  margin: 15px auto;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: center;
+}
+#qrcode { width: 120px; height: 120px; }
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: background .2s;
+}
+.btn-primary { background: #fff; color: #000; }
+
+/* Thanks Modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.8);
+  backdrop-filter: blur(10px);
+}
+.modal-content {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  margin: 15% auto;
+  padding: 20px;
+  width: 80%;
+  max-width: 300px;
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.close:hover { color: #fff; }
+
+/* snowflakes */
+.snowflake {
+  position: fixed;
+  top: -10px;
+  color: #fff;
+  font-size: 10px;
+  opacity: 0.8;
+  animation: fall linear infinite;
+}
+@keyframes fall {
+  0% { transform: translateY(-10px); }
+  100% { transform: translateY(110vh); }
+}
+</style>
 </head>
+
 <body>
-  <div id="main">
-    <h1>Support the Stream ❤️</h1>
-    <div class="qr-box">
-      <canvas id="qrcode"></canvas>
-    </div>
-    <button class="pay-btn" id="payBtn">Pay via UPI App</button>
-    <div class="status" id="status">Scan QR or tap button to pay</div>
+<canvas id="particles"></canvas>
+
+<div class="container">
+  <div class="avatar">
+  <img src="https://i.ibb.co/kVqQnJR0/IMG-20250628-110410-817.webp" alt="BobaMasterFPS Avatar">
+</div>
+  <div class="title">BobaMasterFPS</div>
+  <div class="subtitle">Competitive FPS Streamer</div>
+  <div class="status">Competitive FPS streamer • Jokes, gameplay & community. Drop by the stream — your support helps upgrades, giveaways & more!</div>
+
+  <div class="socials">
+    <a href="https://discord.gg/K79u8V5FRd">💬</a>
+    <a href="https://www.twitch.tv/bobamasterfps">🎮</a>
+    <a href="https://www.youtube.com/bobamasterfps">▶</a>
+    <a href="https://twitter.com/bobamasterfps">🐦</a>
   </div>
-  <div class="thank-you" id="thanks">✅ Payment Received! Thank You!</div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-  <script>
-    function getParam(name) {
-      return new URLSearchParams(window.location.search).get(name);
-    }
+  <div class="qwrap"><canvas id="qrcode"></canvas></div>
+  <div style="font-size:13px;color:#ccc">Donate via UPI: <b>lazy.saifali@fam</b></div>
+  <div class="buttons">
+    <button class="btn btn-primary" id="payBtn">Paid</button>
+  </div>
+</div>
 
-    const pa = getParam('pa') || 'lazy.saifali@fam';
-    const pn = getParam('pn') || 'Streamer';
-    const am = getParam('am');
-    const tn = getParam('tn') || 'Thanks for supporting!';
-    
-    const upiUrl = `upi://pay?pa=${encodeURIComponent(pa)}&pn=${encodeURIComponent(pn)}${am ? `&am=${am}` : ''}&tn=${encodeURIComponent(tn)}`;
+<!-- Thanks Modal -->
+<div id="thanksModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h2 style="color: #fff; font-size: 24px; margin-bottom: 10px;">Thank You! 🎉</h2>
+    <p style="color: #ccc; font-size: 14px;">Your support means the world to me! Let's keep the fun going. 🚀</p>
+  </div>
+</div>
 
-    // Generate QR code
-    const qr = new QRious({
-      element: document.getElementById('qrcode'),
-      value: upiUrl,
-      size: 250,
-    });
+<script>
+// QR + Snow + Donate logic
+const UPI_ID = 'lazy.saifali@fam';
+const UPI_NAME = 'BobaMasterFPS';
+function buildUpi(amount=''){
+  return `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}${amount?`&am=${amount}`:''}&tn=Thanks`;
+}
+const upiLink = buildUpi('');
+new QRious({element: document.getElementById('qrcode'), value: upiLink, size: 120, background: 'white', foreground: '#000'});
 
-    document.getElementById('payBtn').addEventListener('click', () => {
-      window.location.href = upiUrl;
-    });
+// Modified Pay Button: Show thanks modal with confetti animation
+document.getElementById('payBtn').onclick = function() {
+  // Trigger confetti
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 }
+  });
+  
+  // Show modal
+  document.getElementById('thanksModal').style.display = 'block';
+  
+  // Optionally, still redirect to UPI after a delay (simulate payment)
+  setTimeout(() => {
+    location.href = upiLink;
+  }, 2000); // 2 seconds delay to show thanks
+};
 
-    // Simulate auto-confirm after 10s (for demo)
-    // Remove this block if you plan to connect to real backend
-    setTimeout(() => {
-      document.getElementById('main').classList.add('fade-out');
-      document.getElementById('thanks').style.display = 'block';
-      setTimeout(() => {
-        // Try to close if inside browser popup
-        window.close();
-      }, 3000);
-    }, 10000); // 10 seconds after opening
+// Function to close modal
+function closeModal() {
+  document.getElementById('thanksModal').style.display = 'none';
+}
 
-  </script>
+// Close modal on outside click
+window.onclick = function(event) {
+  const modal = document.getElementById('thanksModal');
+  if (event.target == modal) {
+    modal.style.display = 'none';
+  }
+};
+
+// Snowflakes
+function createSnowflake(){
+  const snow = document.createElement('div');
+  snow.classList.add('snowflake');
+  snow.textContent = '❆';
+  snow.style.left = Math.random() * 100 + 'vw';
+  snow.style.animationDuration = 4 + Math.random() * 6 + 's';
+  document.body.appendChild(snow);
+  setTimeout(()=>snow.remove(),10000);
+}
+setInterval(createSnowflake,200);
+</script>
 </body>
 </html>
