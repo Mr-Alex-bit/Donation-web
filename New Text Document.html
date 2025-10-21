@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Donate via UPI</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .qr-box {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .pay-btn {
+      background: #00c853;
+      color: white;
+      padding: 12px 24px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .status {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #ccc;
+    }
+
+    .thank-you {
+      font-size: 28px;
+      color: #00e676;
+      display: none;
+    }
+
+    .fade-out {
+      animation: fadeOut 1s forwards;
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="main">
+    <h1>Support the Stream ❤️</h1>
+    <div class="qr-box">
+      <canvas id="qrcode"></canvas>
+    </div>
+    <button class="pay-btn" id="payBtn">Pay via UPI App</button>
+    <div class="status" id="status">Scan QR or tap button to pay</div>
+  </div>
+  <div class="thank-you" id="thanks">✅ Payment Received! Thank You!</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <script>
+    function getParam(name) {
+      return new URLSearchParams(window.location.search).get(name);
+    }
+
+    const pa = getParam('pa') || 'lazy.saifali@fam';
+    const pn = getParam('pn') || 'Streamer';
+    const am = getParam('am');
+    const tn = getParam('tn') || 'Thanks for supporting!';
+    
+    const upiUrl = `upi://pay?pa=${encodeURIComponent(pa)}&pn=${encodeURIComponent(pn)}${am ? `&am=${am}` : ''}&tn=${encodeURIComponent(tn)}`;
+
+    // Generate QR code
+    const qr = new QRious({
+      element: document.getElementById('qrcode'),
+      value: upiUrl,
+      size: 250,
+    });
+
+    document.getElementById('payBtn').addEventListener('click', () => {
+      window.location.href = upiUrl;
+    });
+
+    // Simulate auto-confirm after 10s (for demo)
+    // Remove this block if you plan to connect to real backend
+    setTimeout(() => {
+      document.getElementById('main').classList.add('fade-out');
+      document.getElementById('thanks').style.display = 'block';
+      setTimeout(() => {
+        // Try to close if inside browser popup
+        window.close();
+      }, 3000);
+    }, 10000); // 10 seconds after opening
+
+  </script>
+</body>
+</html>
